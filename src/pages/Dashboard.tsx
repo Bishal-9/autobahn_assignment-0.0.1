@@ -1,31 +1,20 @@
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { Box, CircularProgress, Typography } from "@mui/material"
-import { Post } from "../types/Post"
 import SinglePost from "../components/SinglePost"
+import { getAllPosts } from '../features/postSlice'
+import { useAppDispatch } from "../hooks/useAppDispatch"
+import { useAppSelector } from "../hooks/useAppSelector"
 
 const Dashboard = () => {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
+
+  const dispatch = useAppDispatch()
+  const { list, loading } = useAppSelector((state) => state.post)
 
   useEffect(() => {
-    fetchPosts()
-  }, [])
-
-  const fetchPosts = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch("https://jsonplaceholder.typicode.com/posts")
-
-      if (response?.ok) {
-        const data = await response.json()
-        setPosts(data)
-      }
-    } catch (error) {
-      console.log("Fetch posts error: ", error)
-    } finally {
-      setLoading(false)
+    if (dispatch) {
+      dispatch(getAllPosts())
     }
-  }
+  }, [dispatch])
 
   return (
     <Box>
@@ -33,8 +22,8 @@ const Dashboard = () => {
         <Box padding="30px" display="flex" justifyContent="center">
           <CircularProgress />
         </Box>
-      ) : posts.length > 0 ? (
-        posts.map((post) => (
+      ) : list.length > 0 ? (
+        list.map((post) => (
           <SinglePost key={post.id} post={post} />
         ))
       ) : (
