@@ -26,7 +26,7 @@ export const getAllPosts = createAsyncThunk("post/getAllPosts", async (_, { reje
   }
 })
 
-export const addPost = createAsyncThunk("post/addPost", async (post: Post, { rejectWithValue }) => {
+export const addPost = createAsyncThunk("post/addPost", async (post: Omit<Post, "id">, { rejectWithValue }) => {
   try {
     const response = await fetch("https://jsonplaceholder.typicode.com/posts", {
       method: "POST",
@@ -75,6 +75,18 @@ export const postSlice = createSlice({
       state.error = null
     },
     [getAllPosts.rejected.type]: (state, action: PayloadAction<string>) => {
+      state.loading = false
+      state.error = action.payload
+    },
+    [addPost.pending.type]: (state) => {
+      state.loading = true
+    },
+    [addPost.fulfilled.type]: (state, action: PayloadAction<Post>) => {
+      state.list[100] = action.payload
+      state.loading = false
+      state.error = null
+    },
+    [addPost.rejected.type]: (state, action: PayloadAction<string>) => {
       state.loading = false
       state.error = action.payload
     }
