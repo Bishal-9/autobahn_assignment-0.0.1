@@ -1,11 +1,16 @@
-import { Box } from '@mui/material'
-import { Post } from '../types/Post'
+import { Box, Button } from "@mui/material"
+import { Post } from "../types/Post"
+import { useAppDispatch } from "../hooks/useAppDispatch"
+import { openModal } from "../features/modalSlice"
 
 interface SinglePostProps {
   post: Post
 }
 
 const SinglePost = ({ post }: SinglePostProps) => {
+
+  const dispatch = useAppDispatch()
+
   return (
     <Box
       key={post.id}
@@ -14,8 +19,19 @@ const SinglePost = ({ post }: SinglePostProps) => {
       borderRadius="5px"
       marginBottom="30px"
     >
-      <Box marginBottom="10px">
+      <Box
+        display="flex"
+        marginBottom="10px"
+        alignItems="center"
+        justifyContent="space-between"
+      >
         <strong>{post.title}</strong>
+
+        <Button
+          onClick={() => dispatch(openModal({ mode: "Edit", post: post }))}
+        >
+          Edit
+        </Button>
       </Box>
       <Box>
         {post.body}

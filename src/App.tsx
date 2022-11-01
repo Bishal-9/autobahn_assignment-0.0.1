@@ -1,19 +1,18 @@
-import { useState } from "react"
-import { Provider } from "react-redux"
-import store from "./store"
 import { Box, Button, Typography } from "@mui/material"
 import Dashboard from "./pages/Dashboard"
 import Notify from "./components/Notify"
 import AddEditPost from "./components/AddEditPost"
+import { useAppDispatch } from './hooks/useAppDispatch'
+import { openModal } from './features/modalSlice'
 
 function App() {
-  const [showModal, setShowModal] = useState(false)
-  const [modalMode, setModalMode] = useState<"add" | "edit">("add")
+
+  const dispatch = useAppDispatch()
 
   return (
-    <Provider store={store}>
+    <>
       <Notify />
-      <AddEditPost open={showModal} mode={modalMode} onClose={() => setShowModal(false)} />
+      <AddEditPost />
 
       <Box padding="30px">
         <Box display="flex" alignItems="center" justifyContent="space-between">
@@ -22,10 +21,7 @@ function App() {
           </Typography>
           <Button
             variant="contained"
-            onClick={() => {
-              setShowModal(true)
-              setModalMode("add")
-            }}
+            onClick={() => dispatch(openModal({ mode: "Add" }))}
           >
             Add Post
           </Button>
@@ -33,7 +29,7 @@ function App() {
 
         <Dashboard />
       </Box>
-    </Provider>
+    </>
   )
 }
 

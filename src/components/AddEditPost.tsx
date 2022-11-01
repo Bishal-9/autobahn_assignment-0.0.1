@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   Button,
   CircularProgress,
@@ -15,13 +16,8 @@ import {
 import { useForm } from "react-hook-form"
 import { useAppDispatch } from "../hooks/useAppDispatch"
 import { useAppSelector } from "../hooks/useAppSelector"
-import { addPost } from "../features/postSlice"
-
-interface AddEditPostProps {
-  open: boolean
-  mode: "add" | "edit"
-  onClose: () => void
-}
+import { addPost, editPost } from "../features/postSlice"
+import { closeModal } from '../features/modalSlice'
 
 interface PostForm {
   userId: number
@@ -29,26 +25,41 @@ interface PostForm {
   body: string
 }
 
-const AddEditPost = ({ open, mode, onClose }: AddEditPostProps) => {
+const AddEditPost = () => {
   const dispatch = useAppDispatch()
+  const { open, mode, post } = useAppSelector((state) => state.modal)
   const {
     formState: { errors },
     register,
     handleSubmit,
     reset,
+    setValue
   } = useForm<PostForm>()
   const { loading } = useAppSelector((state) => state.post)
 
   const onSubmit = handleSubmit((data) => {
-    dispatch(addPost(data))
+    if (mode === "Add") {
+      dispatch(addPost(data))
+    } else if (mode === "Edit" && post?.id) {
+      const newPostData = { ...data, id: post.id }
+      dispatch(editPost(newPostData))
+    }
     reset()
-    onClose()
+    dispatch(closeModal())
   })
 
+  useEffect(() => {
+    if (mode === "Edit" && post) {
+      setValue("userId", post?.userId)
+      setValue("title", post?.title)
+      setValue("body", post?.body)
+    }
+  }, [mode, post, setValue])
+
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={() => dispatch(closeModal())}>
       <DialogTitle component='div'>
-        {mode === "add" ? (
+        {mode === "Add" ? (
           <Typography variant="h6" textAlign="center">Add Post</Typography>
         ) : (
           <Typography variant="h6" textAlign="center">Edit Post</Typography>
@@ -105,8 +116,7 @@ const AddEditPost = ({ open, mode, onClose }: AddEditPostProps) => {
           <FormControl>
             <TextField
               multiline
-              minRows={4}
-              maxRows={8}
+              rows={4}
               size="small"
               label="Body"
               error={!!errors.body}
@@ -134,13 +144,13 @@ const AddEditPost = ({ open, mode, onClose }: AddEditPostProps) => {
               type="reset"
               onClick={() => {
                 reset()
-                onClose()
+                dispatch(closeModal())
               }}
             >
               Cancel
             </Button>
             <Button variant="contained" type="submit" onClick={onSubmit}>
-              {mode === "add" ? "Add Post" : "Edit Post"}
+              {mode === "Add" ? "Add Post" : "Edit Post"}
             </Button>
           </>
         )}
